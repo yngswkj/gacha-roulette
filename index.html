@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽選ガチャガチャ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <h1 class="app-title">🎰 抽選ガチャガチャ</h1>
+      <div class="stats">
+        <span class="stat-item">
+          <span class="stat-label">未抽選:</span>
+          <span class="stat-value" id="eligible-count">0</span>
+        </span>
+        <span class="stat-item">
+          <span class="stat-label">総項目数:</span>
+          <span class="stat-value" id="total-count">0</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- タブナビゲーション -->
+    <nav class="tab-navigation">
+      <button class="tab-button active" data-tab="manage">
+        📝 項目管理
+      </button>
+      <button class="tab-button" data-tab="confirm">
+        ✅ 抽選対象確認
+      </button>
+      <button class="tab-button" data-tab="lottery">
+        🎲 抽選実行
+      </button>
+    </nav>
+
+    <!-- タブコンテンツ -->
+    <main class="tab-content-container">
+      <!-- 管理タブ -->
+      <div id="manage-tab" class="tab-content active">
+        <div class="tab-header">
+          <h2>項目管理</h2>
+          <button id="add-item-btn" class="btn-secondary">
+            ➕ 項目を追加
+          </button>
+        </div>
+
+        <div id="items-grid" class="items-grid">
+          <!-- 項目カードが動的生成される -->
+        </div>
+
+        <div class="tab-footer">
+          <button id="reset-all-btn" class="btn-danger btn-small">
+            🔄 全項目をリセット
+          </button>
+        </div>
+      </div>
+
+      <!-- 確認タブ -->
+      <div id="confirm-tab" class="tab-content">
+        <div class="tab-header">
+          <h2>抽選対象の確認</h2>
+        </div>
+
+        <div class="confirm-info">
+          <div class="info-box">
+            <h3>抽選対象項目数</h3>
+            <p class="big-number" id="confirm-eligible-count">0</p>
+          </div>
+        </div>
+
+        <div id="eligible-items-list" class="eligible-items-list">
+          <!-- 未抽選項目のリストが表示される -->
+        </div>
+
+        <div class="tab-footer">
+          <button id="goto-lottery-btn" class="btn-primary btn-large">
+            次へ：抽選実行 →
+          </button>
+        </div>
+      </div>
+
+      <!-- 抽選タブ -->
+      <div id="lottery-tab" class="tab-content">
+        <!-- 抽選前の状態 -->
+        <div id="lottery-ready" class="lottery-state active">
+          <div class="tab-header">
+            <h2>抽選実行</h2>
+          </div>
+
+          <div class="lottery-info">
+            <p class="lottery-message">
+              準備完了！抽選ボタンを押してください
+            </p>
+            <p class="lottery-detail">
+              抽選対象: <span id="lottery-eligible-count">0</span> 項目
+            </p>
+          </div>
+
+          <div class="action-area">
+            <button id="start-lottery-btn" class="btn-primary btn-large">
+              🎲 抽選開始
+            </button>
+          </div>
+        </div>
+
+        <!-- 抽選中の状態 -->
+        <div id="lottery-running" class="lottery-state">
+          <div class="lottery-animation">
+            <div class="spinner"></div>
+            <p id="lottery-message" class="lottery-message">抽選中...</p>
+          </div>
+        </div>
+
+        <!-- 結果表示の状態 -->
+        <div id="lottery-result" class="lottery-state">
+          <div class="result-header">
+            <h2 class="result-title">🎉 当選項目 🎉</h2>
+          </div>
+
+          <div class="result-container">
+            <div class="winner-display">
+              <div class="capsule-container">
+                <div class="capsule" id="result-capsule"></div>
+              </div>
+              <div class="winner-name" id="winner-name">
+                <!-- 項目名が表示される -->
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-footer">
+            <button id="back-to-manage-btn" class="btn-secondary btn-large">
+              ← 管理画面に戻る
+            </button>
+            <button id="lottery-again-btn" class="btn-primary btn-large">
+              🔄 もう一度抽選
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- トースト通知用コンテナ -->
+  <div id="toast-container"></div>
+
+  <!-- Matter.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
+  <!-- JavaScriptファイル -->
+  <script src="js/storage.js"></script>
+  <script src="js/itemManager.js"></script>
+  <script src="js/animationManager.js"></script>
+  <script src="js/gachaPhysics.js"></script>
+  <script src="js/uiController.js"></script>
+  <script src="js/lottery.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
