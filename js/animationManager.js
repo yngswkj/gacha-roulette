@@ -22,23 +22,44 @@ class AnimationManager {
       justify-content: center;
     `;
 
+    // ビューポートサイズに基づいてCanvas寸法を計算
+    const maxWidth = window.innerWidth * 0.9;  // 90vw
+    const maxHeight = window.innerHeight * 0.7; // 70vh
+
+    // アスペクト比を維持しながら最適なサイズを計算（3:2の比率）
+    const aspectRatio = 3 / 2;
+    let canvasWidth, canvasHeight;
+
+    if (maxWidth / maxHeight > aspectRatio) {
+      // 高さ基準で計算
+      canvasHeight = maxHeight;
+      canvasWidth = canvasHeight * aspectRatio;
+    } else {
+      // 幅基準で計算
+      canvasWidth = maxWidth;
+      canvasHeight = canvasWidth / aspectRatio;
+    }
+
     const canvas = document.createElement('canvas');
     canvas.id = 'physics-canvas';
-    canvas.width = 1200;
-    canvas.height = 800;
+    canvas.width = Math.floor(canvasWidth);
+    canvas.height = Math.floor(canvasHeight);
     canvas.style.cssText = `
       border: 4px solid var(--primary);
       border-radius: 16px;
       box-shadow: 0 0 40px rgba(255, 107, 107, 0.5);
-      max-width: 90vw;
-      max-height: 70vh;
+      width: ${canvasWidth}px;
+      height: ${canvasHeight}px;
     `;
+
+    console.log('Canvas size calculated:', canvasWidth, 'x', canvasHeight);
+    console.log('Viewport size:', window.innerWidth, 'x', window.innerHeight);
 
     const message = document.createElement('div');
     message.id = 'physics-message';
     message.style.cssText = `
       font-size: 48px;
-      color: var(--text-primary);
+      color: var(--text);
       margin-top: 30px;
       font-weight: bold;
       text-align: center;

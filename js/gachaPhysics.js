@@ -13,7 +13,16 @@ class GachaPhysicsEngine {
 
   // 物理エンジンの初期化
   initEngine(canvas) {
+    if (typeof Matter === 'undefined') {
+      console.error('Matter.js is not loaded!');
+      throw new Error('Matter.js library is not loaded');
+    }
+
     const { Engine, Render, World, Bodies, Runner } = Matter;
+
+    console.log('[DEBUG] Canvas element:', canvas);
+    console.log('[DEBUG] Canvas dimensions:', canvas.width, 'x', canvas.height);
+    console.log('[DEBUG] Canvas in DOM:', document.body.contains(canvas));
 
     this.engine = Engine.create({
       gravity: { x: 0, y: 1 }
@@ -26,12 +35,45 @@ class GachaPhysicsEngine {
       options: {
         width: canvas.width,
         height: canvas.height,
-        wireframes: false,
+        wireframes: true,  // 一時的にワイヤーフレームモードで確認
         background: '#0f0f23'
       }
     });
 
+    console.log('[DEBUG] Render created:', this.render);
+    console.log('[DEBUG] Render.canvas:', this.render.canvas);
+    console.log('[DEBUG] Render.context:', this.render.context);
+
     this.runner = Runner.create();
+
+    // Runnerを開始（物理エンジンの更新）
+    Runner.run(this.runner, this.engine);
+
+    // 手動レンダリングループを開始（Matter.js v0.19.0 対応）
+    let frameCount = 0;
+    const self = this;
+    (function render() {
+      if (frameCount < 5) {
+        console.log(`[DEBUG] Render frame ${frameCount}, bodies:`, self.world.bodies.length);
+      }
+      frameCount++;
+
+      // Matter.js v0.19.0では個別にレンダリング関数を呼ぶ必要がある
+      const context = self.render.context;
+      const engine = self.render.engine;
+      const options = self.render.options;
+
+      // 背景をクリア
+      context.fillStyle = options.background || '#0f0f23';
+      context.fillRect(0, 0, self.render.canvas.width, self.render.canvas.height);
+
+      // ボディを描画
+      Matter.Render.bodies(self.render, self.world.bodies, context);
+
+      self.render.frameRequestId = requestAnimationFrame(render);
+    })();
+
+    console.log('[DEBUG] Rendering loop started');
   }
 
   // 抽選開始
@@ -51,6 +93,10 @@ class GachaPhysicsEngine {
     try {
       // 物理演算オーバーレイを表示
       const { overlay, canvas, message } = this.animationManager.showPhysicsOverlay();
+
+      // DOMレンダリングを待つ（重要！）
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // 物理エンジン初期化
       this.initEngine(canvas);
@@ -124,22 +170,38 @@ class GachaPhysicsEngine {
 
     const ground = Bodies.rectangle(width / 2, height - 25, width, wallThickness, {
       isStatic: true,
-      render: { fillStyle: '#4ECDC4' }
+      render: {
+        fillStyle: '#4ECDC4',
+        strokeStyle: '#ffffff',
+        lineWidth: 2
+      }
     });
 
     const leftWall = Bodies.rectangle(25, height / 2, wallThickness, height, {
       isStatic: true,
-      render: { fillStyle: '#4ECDC4' }
+      render: {
+        fillStyle: '#4ECDC4',
+        strokeStyle: '#ffffff',
+        lineWidth: 2
+      }
     });
 
     const rightWall = Bodies.rectangle(width - 25, height / 2, wallThickness, height, {
       isStatic: true,
-      render: { fillStyle: '#4ECDC4' }
+      render: {
+        fillStyle: '#4ECDC4',
+        strokeStyle: '#ffffff',
+        lineWidth: 2
+      }
     });
 
     const ceiling = Bodies.rectangle(width / 2, 25, width, wallThickness, {
       isStatic: true,
-      render: { fillStyle: '#4ECDC4' }
+      render: {
+        fillStyle: '#4ECDC4',
+        strokeStyle: '#ffffff',
+        lineWidth: 2
+      }
     });
 
     World.add(this.world, [ground, leftWall, rightWall, ceiling]);
@@ -147,7 +209,7 @@ class GachaPhysicsEngine {
 
   // フェーズ1: カプセル投入
   async phase1_dropCapsules(items, canvasWidth) {
-    const { Bodies, World, Render, Runner } = Matter;
+    const { Bodies, World } = Matter;
     this.capsules = [];
 
     const capsuleRadius = 30;
@@ -173,10 +235,6 @@ class GachaPhysicsEngine {
       this.capsules.push(capsule);
       World.add(this.world, capsule);
     });
-
-    // レンダリング開始
-    Render.run(this.render);
-    Runner.run(this.runner, this.engine);
   }
 
   // フェーズ2: シャッフル

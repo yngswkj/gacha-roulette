@@ -129,11 +129,17 @@ class UIController {
 
   startLottery() {
     const eligible = this.itemManager.getEligibleItems();
+
     if (eligible.length === 0) {
       this.toast('未抽選の項目がありません', 'error');
       return;
     }
-    if (this.lottery) this.lottery.start(eligible);
+
+    if (this.lottery) {
+      this.lottery.start(eligible);
+    } else {
+      console.error('[ERROR] this.lottery is null or undefined!');
+    }
   }
 
   lotteryAgain() {
