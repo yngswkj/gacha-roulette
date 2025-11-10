@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>抽選ガチャガチャ</title>
+  <title>ガチャルーレット</title>
+  <!-- Google Fonts: Inter - Professional Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="app-container">
     <!-- ヘッダー -->
     <header class="app-header">
-      <h1 class="app-title">🎰 抽選ガチャガチャ</h1>
+      <h1 class="app-title">ガチャルーレット</h1>
       <div class="stats">
         <span class="stat-item">
           <span class="stat-label">未抽選:</span>
@@ -26,13 +30,13 @@
     <!-- タブナビゲーション -->
     <nav class="tab-navigation">
       <button class="tab-button active" data-tab="manage">
-        📝 項目管理
+        管理
       </button>
       <button class="tab-button" data-tab="confirm">
-        ✅ 抽選対象確認
+        確認
       </button>
       <button class="tab-button" data-tab="lottery">
-        🎲 抽選実行
+        抽選
       </button>
     </nav>
 
@@ -43,7 +47,7 @@
         <div class="tab-header">
           <h2>項目管理</h2>
           <button id="add-item-btn" class="btn-secondary">
-            ➕ 項目を追加
+            項目を追加
           </button>
         </div>
 
@@ -52,8 +56,11 @@
         </div>
 
         <div class="tab-footer">
+          <button id="delete-all-btn" class="btn-danger btn-small">
+            全項目を削除
+          </button>
           <button id="reset-all-btn" class="btn-danger btn-small">
-            🔄 全項目をリセット
+            全項目をリセット
           </button>
         </div>
       </div>
@@ -77,7 +84,7 @@
 
         <div class="tab-footer">
           <button id="goto-lottery-btn" class="btn-primary btn-large">
-            次へ：抽選実行 →
+            抽選を開始
           </button>
         </div>
       </div>
@@ -101,7 +108,7 @@
 
           <div class="action-area">
             <button id="start-lottery-btn" class="btn-primary btn-large">
-              🎲 抽選開始
+              抽選開始
             </button>
           </div>
         </div>
@@ -117,7 +124,7 @@
         <!-- 結果表示の状態 -->
         <div id="lottery-result" class="lottery-state">
           <div class="result-header">
-            <h2 class="result-title">🎉 当選項目 🎉</h2>
+            <h2 class="result-title">当選</h2>
           </div>
 
           <div class="result-container">
@@ -133,10 +140,10 @@
 
           <div class="tab-footer">
             <button id="back-to-manage-btn" class="btn-secondary btn-large">
-              ← 管理画面に戻る
+              管理に戻る
             </button>
             <button id="lottery-again-btn" class="btn-primary btn-large">
-              🔄 もう一度抽選
+              もう一度抽選
             </button>
           </div>
         </div>

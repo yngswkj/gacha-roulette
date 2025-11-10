@@ -1,5 +1,10 @@
 /* ==========================================
-   リセット & ベーススタイル
+   ETHEREAL MINIMALISM - Premium Design System
+   "世界をとるアプリ" - Apple-level Refinement
+   ========================================== */
+
+/* ==========================================
+   Reset & Foundation
    ========================================== */
 * {
   margin: 0;
@@ -8,141 +13,265 @@
 }
 
 :root {
-  /* カラーパレット */
-  --primary: #FF6B6B;
-  --secondary: #4ECDC4;
-  --background: #0f0f23;
-  --surface: #1a1a2e;
-  --text: #ffffff;
-  --text-secondary: #a0a0b0;
-  --winner: #FFD700;
-  --loser: #505060;
-  --danger: #ff4757;
+  /* ==========================================
+     Color System - Monochromatic + Purple Accent
+     ========================================== */
 
-  /* カプセルカラー */
-  --capsule-1: #FF6B6B;
-  --capsule-2: #4ECDC4;
-  --capsule-3: #95E1D3;
-  --capsule-4: #FFE66D;
-  --capsule-5: #C77DFF;
-}
+  /* Primary Accent - Deep Purple (唯一の彩度高い色) */
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #4F46E5;
+  --color-primary-700: #4338CA;
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, var(--background) 0%, #1a1a3e 100%);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.6;
-  overflow-x: hidden;
+  /* Neutral Grayscale - Foundation */
+  --color-neutral-950: #0A0A0F;
+  --color-neutral-900: #18181B;
+  --color-neutral-800: #27272A;
+  --color-neutral-700: #3F3F46;
+  --color-neutral-600: #52525B;
+  --color-neutral-500: #71717A;
+  --color-neutral-400: #A1A1AA;
+  --color-neutral-300: #D4D4D8;
+  --color-neutral-200: #E4E4E7;
+  --color-neutral-100: #F4F4F5;
+  --color-neutral-50: #FAFAFA;
+
+  /* Functional Colors - Subtle */
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #F59E0B;
+
+  /* Semantic Tokens */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A1A1AA;
+  --color-text-tertiary: #71717A;
+
+  --color-bg-primary: var(--color-neutral-950);
+  --color-bg-secondary: var(--color-neutral-900);
+  --color-bg-elevated: var(--color-neutral-800);
+
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-default: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Capsule Colors - Purple Gradient (統一感) */
+  --capsule-1: #6366F1;
+  --capsule-2: #818CF8;
+  --capsule-3: #A5B4FC;
+  --capsule-4: #4F46E5;
+  --capsule-5: #4338CA;
+
+  /* ==========================================
+     Typography System - 5-level Hierarchy
+     ========================================== */
+  --font-size-display: 48px;   /* H1: App Title only */
+  --font-size-headline: 32px;  /* H2: Section Headers */
+  --font-size-title: 20px;     /* H3: Card Titles */
+  --font-size-body: 16px;      /* Normal Text, Buttons */
+  --font-size-caption: 14px;   /* Supporting Text */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* ==========================================
+     Spacing System - 5-level Scale
+     ========================================== */
+  --spacing-tight: 8px;
+  --spacing-base: 16px;
+  --spacing-loose: 24px;
+  --spacing-relaxed: 32px;
+  --spacing-spacious: 48px;
+
+  /* ==========================================
+     Elevation - Subtle Shadows
+     ========================================== */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --elevation-2: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --elevation-3: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --elevation-4: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  /* ==========================================
+     Border Radius - Consistent Rounding
+     ========================================== */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* ==========================================
+     Motion - Fast & Purposeful
+     ========================================== */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-slow: 400ms;
+
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* ==========================================
+     Focus Ring - Accessibility
+     ========================================== */
+  --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.5);
+  --focus-ring-offset: 2px;
 }
 
 /* ==========================================
-   アプリコンテナ
+   Base Styles
+   ========================================== */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Yu Gothic', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--color-neutral-950) 0%, var(--color-neutral-900) 100%);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-base);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'tnum' 1, 'cv05' 1, 'cv08' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle Texture Overlay - Minimal */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ==========================================
+   Focus Management
+   ========================================== */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: var(--focus-ring-offset) solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+/* ==========================================
+   Layout
    ========================================== */
 .app-container {
-  max-width: 1600px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--spacing-spacious) var(--spacing-relaxed);
 }
 
 /* ==========================================
-   ヘッダー
+   Header - Minimal & Premium
    ========================================== */
 .app-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-spacious);
 }
 
 .app-title {
-  font-size: 72px;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
-  background: linear-gradient(45deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-loose);
+  letter-spacing: -0.04em;
+  line-height: var(--line-height-tight);
+  text-align: center;
 }
 
+/* Stats - Clean & Minimal */
 .stats {
   display: flex;
   justify-content: center;
-  gap: 3rem;
-  font-size: 28px;
+  gap: var(--spacing-loose);
+  font-size: var(--font-size-body);
 }
 
 .stat-item {
-  background: var(--surface);
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  border: 2px solid rgba(78, 205, 196, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--spacing-base) var(--spacing-loose);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-default);
+  transform: translateY(-1px);
 }
 
 .stat-label {
-  color: var(--text-secondary);
-  margin-right: 0.5rem;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  margin-right: var(--spacing-tight);
 }
 
 .stat-value {
-  color: var(--secondary);
-  font-weight: bold;
-  font-size: 32px;
+  color: var(--color-primary-400);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-title);
 }
 
 /* ==========================================
-   タブナビゲーション
+   Tab Navigation - Refined
    ========================================== */
 .tab-navigation {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  background: var(--surface);
-  padding: 1rem;
-  border-radius: 16px;
-  border: 2px solid rgba(78, 205, 196, 0.3);
+  gap: var(--spacing-tight);
+  margin-bottom: var(--spacing-spacious);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  padding: var(--spacing-tight);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .tab-button {
   font-family: inherit;
-  font-size: 32px;
-  font-weight: bold;
-  padding: 1.5rem 3rem;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-base) var(--spacing-relaxed);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--duration-fast) var(--ease-smooth);
   position: relative;
+  min-height: 44px;
+  min-width: 100px;
+  white-space: nowrap;
 }
 
-.tab-button:hover {
-  background: rgba(78, 205, 196, 0.1);
-  color: var(--text);
+.tab-button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
 }
 
 .tab-button.active {
-  background: linear-gradient(135deg, var(--secondary), #6eddd5);
+  background: var(--color-primary-600);
   color: white;
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-}
-
-.tab-button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 15px solid var(--secondary);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 /* ==========================================
-   タブコンテンツ
+   Tab Content
    ========================================== */
 .tab-content-container {
   min-height: 500px;
@@ -150,7 +279,7 @@ body {
 
 .tab-content {
   display: none;
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn var(--duration-base) var(--ease-smooth);
 }
 
 .tab-content.active {
@@ -160,7 +289,7 @@ body {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -172,260 +301,311 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-relaxed);
 }
 
 .tab-header h2 {
-  font-size: 48px;
-  color: var(--text);
+  font-size: var(--font-size-headline);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
 }
 
 .tab-footer {
-  text-align: center;
-  margin-top: 3rem;
-  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-base);
+  margin-top: var(--spacing-spacious);
+  padding: var(--spacing-relaxed) 0;
 }
 
 /* ==========================================
-   ボタンスタイル
+   Button System - 3 Variants Only
    ========================================== */
 button {
   font-family: inherit;
   cursor: pointer;
   border: none;
-  border-radius: 12px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(0);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--duration-fast) var(--ease-smooth);
+  position: relative;
+  min-height: 44px;
+  touch-action: manipulation;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body);
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
 }
 
-.btn-large {
-  font-size: 48px;
-  padding: 2rem 4rem;
-}
-
-.btn-small {
-  font-size: 24px;
-  padding: 0.75rem 1.5rem;
-}
-
+/* Primary CTA - Most Important Action */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), #ff8787);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-500));
   color: white;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+  padding: 0 var(--spacing-relaxed);
+  height: 48px;
+  min-width: 140px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+  font-weight: var(--font-weight-semibold);
 }
 
 .btn-primary:hover:not(:disabled) {
-  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-600));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary - Standard Action */
 .btn-secondary {
-  background: linear-gradient(135deg, var(--secondary), #6eddd5);
-  color: white;
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-  font-size: 28px;
-  padding: 1rem 2rem;
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, var(--danger), #ff6b81);
-  color: white;
-  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
-}
-
-.btn-icon {
   background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: var(--text);
-  font-size: 24px;
-  padding: 0.5rem;
-  width: 50px;
-  height: 50px;
-  display: flex;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  padding: 0 var(--spacing-loose);
+  height: 44px;
+  min-width: 120px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+}
+
+/* Ghost - Subtle Action */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding: 0 var(--spacing-loose);
+  height: 44px;
+  min-width: 100px;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+/* Icon Button */
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
 }
 
-.btn-icon:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.4);
+.btn-icon:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-default);
+  color: var(--color-text-primary);
+}
+
+/* Danger Variant */
+.btn-danger {
+  background: var(--color-error);
+  color: white;
+  padding: 0 var(--spacing-loose);
+  height: 44px;
+  min-width: 120px;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #DC2626;
+  transform: translateY(-1px);
+}
+
+/* Small Variant (for compact spaces) */
+.btn-small {
+  height: 36px;
+  padding: 0 var(--spacing-base);
+  min-width: 100px;
+  font-size: var(--font-size-caption);
+}
+
+/* Large Variant (for hero CTAs) */
+.btn-large {
+  height: 56px;
+  padding: 0 var(--spacing-spacious);
+  min-width: 160px;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* ==========================================
-   管理タブ - 項目一覧
+   Item Cards - Clean & Elegant
    ========================================== */
 .items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-loose);
+  margin-bottom: var(--spacing-relaxed);
 }
 
 .item-card {
-  background: var(--surface);
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 3px solid rgba(78, 205, 196, 0.3);
-  transition: all 0.3s ease;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-loose);
+  border: 1px solid var(--color-border-subtle);
+  transition: all var(--duration-base) var(--ease-smooth);
 }
 
 .item-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border-color: var(--secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-default);
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-3);
 }
 
 .item-card.winner {
-  opacity: 0.6;
-  border-color: var(--loser);
-}
-
-.item-card.winner:hover {
-  transform: translateY(-2px);
+  opacity: 0.5;
+  border-color: var(--color-border-subtle);
 }
 
 .item-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-base);
 }
 
 .capsule-preview {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 -4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 4px 8px rgba(255, 255, 255, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform var(--duration-fast) var(--ease-smooth);
+}
+
+.item-card:hover .capsule-preview {
+  transform: scale(1.05);
 }
 
 .item-status {
-  font-size: 20px;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-weight: bold;
+  font-size: var(--font-size-caption);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid;
 }
 
 .status-eligible {
-  background: rgba(78, 205, 196, 0.2);
-  color: var(--secondary);
-  border: 2px solid var(--secondary);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .status-winner {
-  background: rgba(255, 215, 0, 0.2);
-  color: var(--winner);
-  border: 2px solid var(--winner);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+  border-color: var(--color-warning);
 }
 
 .item-card-body {
-  margin: 1.5rem 0;
+  margin: var(--spacing-base) 0;
 }
 
 .item-name {
-  font-size: 32px;
-  font-weight: bold;
-  color: var(--text);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-base);
   word-break: break-word;
 }
 
 .item-card-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--spacing-tight);
   justify-content: flex-end;
 }
 
 /* ==========================================
-   確認タブ
+   Confirm Tab - Clean Info Display
    ========================================== */
 .confirm-info {
   display: flex;
   justify-content: center;
-  margin-bottom: 3rem;
+  margin-bottom: var(--spacing-spacious);
 }
 
 .info-box {
-  background: var(--surface);
-  padding: 3rem;
-  border-radius: 16px;
-  border: 3px solid rgba(78, 205, 196, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  padding: var(--spacing-spacious);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-subtle);
   text-align: center;
-  min-width: 400px;
+  min-width: 320px;
 }
 
 .info-box h3 {
-  font-size: 36px;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
+  font-size: var(--font-size-title);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-base);
+  font-weight: var(--font-weight-medium);
 }
 
 .big-number {
-  font-size: 96px;
-  font-weight: bold;
-  color: var(--secondary);
-  text-shadow: 0 0 30px rgba(78, 205, 196, 0.5);
+  font-size: 72px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-400);
+  line-height: var(--line-height-tight);
 }
 
 .eligible-items-list {
-  max-width: 1200px;
-  margin: 0 auto 2rem;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-relaxed);
 }
 
 .eligible-item {
-  background: var(--surface);
-  padding: 1.5rem 2rem;
-  margin-bottom: 1rem;
-  border-radius: 12px;
-  border: 2px solid rgba(78, 205, 196, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  padding: var(--spacing-base) var(--spacing-loose);
+  margin-bottom: var(--spacing-base);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  animation: slideIn 0.3s ease-out;
+  gap: var(--spacing-base);
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.eligible-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-default);
 }
 
 .eligible-item .capsule-preview {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
 }
 
 .eligible-item .item-name {
-  font-size: 36px;
+  font-size: var(--font-size-body);
 }
 
 /* ==========================================
-   抽選タブ
+   Lottery Tab - Dramatic Presentation
    ========================================== */
 .lottery-state {
   display: none;
   min-height: 500px;
-  padding: 3rem;
+  padding: var(--spacing-spacious);
 }
 
 .lottery-state.active {
@@ -437,140 +617,76 @@ button:disabled {
 
 .lottery-info {
   text-align: center;
-  margin: 3rem 0;
+  margin: var(--spacing-relaxed) 0;
 }
 
 .lottery-message {
-  font-size: 48px;
-  color: var(--text);
-  font-weight: bold;
-  margin-bottom: 1rem;
+  font-size: var(--font-size-headline);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-base);
+  letter-spacing: -0.02em;
 }
 
 .lottery-detail {
-  font-size: 32px;
-  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
 }
 
 .action-area {
   text-align: center;
-  margin: 3rem 0;
+  margin: var(--spacing-relaxed) 0;
 }
 
-/* 抽選中アニメーション */
+/* Lottery Animation - Minimal Spinner */
 .lottery-animation {
   text-align: center;
-  padding: 4rem;
+  padding: var(--spacing-spacious);
 }
 
 .spinner {
-  width: 200px;
-  height: 200px;
-  margin: 0 auto 3rem;
-  border: 10px solid rgba(78, 205, 196, 0.2);
-  border-top: 10px solid var(--secondary);
-  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--spacing-relaxed);
+  border: 3px solid rgba(99, 102, 241, 0.1);
+  border-top-color: var(--color-primary-500);
+  border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
 #lottery-message {
-  font-size: 48px;
+  font-size: var(--font-size-headline);
+  color: var(--color-text-secondary);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
-/* 結果表示 */
+/* Result Display - Premium Feel */
 .result-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-relaxed);
   text-align: center;
 }
 
 .result-title {
-  font-size: 72px;
-  animation: bounceIn 0.8s ease-out;
-}
-
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.result-container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.winner-display {
-  padding: 3rem;
-  text-align: center;
-}
-
-.capsule-container {
-  margin-bottom: 3rem;
-}
-
-.capsule {
-  width: 200px;
-  height: 200px;
-  margin: 0 auto;
-  border-radius: 50%;
-  border: 8px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  animation: revealCapsule 0.8s ease-out;
-}
-
-@keyframes revealCapsule {
-  0% {
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
-  }
-  50% {
-    transform: scale(1.2) rotate(180deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(360deg);
-  }
-}
-
-.winner-name {
-  font-size: 64px;
-  font-weight: bold;
-  color: var(--winner);
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-  margin-top: 2rem;
-  animation: fadeInUp 0.8s ease-out 0.3s both;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+  letter-spacing: -0.04em;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -578,28 +694,80 @@ button:disabled {
   }
 }
 
+.result-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.winner-display {
+  padding: var(--spacing-spacious);
+  text-align: center;
+}
+
+.capsule-container {
+  margin-bottom: var(--spacing-relaxed);
+}
+
+.capsule {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+  border-radius: var(--radius-full);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    inset 0 -12px 20px rgba(0, 0, 0, 0.2),
+    inset 0 12px 20px rgba(255, 255, 255, 0.1);
+  animation: revealCapsule 0.8s var(--ease-bounce);
+}
+
+@keyframes revealCapsule {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.winner-name {
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-400);
+  margin-top: var(--spacing-loose);
+  animation: fadeInUp var(--duration-slow) var(--ease-out) 0.3s both;
+  letter-spacing: -0.02em;
+}
+
 /* ==========================================
-   トースト通知
+   Toast Notifications - Minimal
    ========================================== */
 #toast-container {
   position: fixed;
-  top: 2rem;
-  right: 2rem;
+  top: var(--spacing-loose);
+  right: var(--spacing-loose);
   z-index: 1000;
 }
 
 .toast {
-  background: var(--surface);
-  color: var(--text);
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  margin-bottom: 1rem;
-  font-size: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  border-left: 5px solid var(--secondary);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  color: var(--color-neutral-900);
+  padding: var(--spacing-base) var(--spacing-loose);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-base);
+  font-size: var(--font-size-body);
+  box-shadow: var(--elevation-3);
+  border-left: 3px solid var(--color-primary-500);
   opacity: 0;
   transform: translateX(100%);
-  transition: all 0.3s ease;
+  transition: all var(--duration-base) var(--ease-smooth);
 }
 
 .toast.show {
@@ -608,43 +776,42 @@ button:disabled {
 }
 
 .toast.toast-error {
-  border-left-color: var(--danger);
+  border-left-color: var(--color-error);
 }
 
 .toast.toast-success {
-  border-left-color: var(--secondary);
+  border-left-color: var(--color-success);
 }
 
 .toast.toast-warning {
-  border-left-color: var(--capsule-4);
+  border-left-color: var(--color-warning);
 }
 
 /* ==========================================
-   レスポンシブ対応
+   Responsive Design
    ========================================== */
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   .app-title {
-    font-size: 56px;
+    font-size: 40px;
   }
 
   .items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-
-  .tab-button {
-    font-size: 28px;
-    padding: 1rem 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
+  .app-container {
+    padding: var(--spacing-loose) var(--spacing-base);
+  }
+
   .app-title {
-    font-size: 42px;
+    font-size: 36px;
   }
 
   .stats {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-base);
   }
 
   .tab-navigation {
@@ -652,36 +819,36 @@ button:disabled {
   }
 
   .tab-button {
-    font-size: 24px;
     width: 100%;
-  }
-
-  .btn-large {
-    font-size: 36px;
-    padding: 1.5rem 3rem;
   }
 
   .items-grid {
     grid-template-columns: 1fr;
   }
 
-  .item-name {
-    font-size: 28px;
-  }
-
   .info-box {
     min-width: auto;
     width: 100%;
   }
+
+  .big-number {
+    font-size: 56px;
+  }
+
+  .lottery-message,
+  .result-title,
+  .winner-name {
+    font-size: var(--font-size-headline);
+  }
 }
 
 /* ==========================================
-   物理演算用アニメーション
+   Physics Animation Helpers
    ========================================== */
 @keyframes capsule-shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px) rotate(-5deg); }
-  75% { transform: translateX(10px) rotate(5deg); }
+  25% { transform: translateX(-8px) rotate(-3deg); }
+  75% { transform: translateX(8px) rotate(3deg); }
 }
 
 @keyframes capsule-open {
@@ -689,24 +856,38 @@ button:disabled {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.3) rotate(180deg);
+    transform: scale(1.2) rotate(180deg);
   }
   100% {
-    transform: scale(1.5) rotate(360deg);
+    transform: scale(1.3) rotate(360deg);
     opacity: 0;
   }
 }
 
 @keyframes screen-shake {
   0%, 100% { transform: translate(0, 0); }
-  10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 5px); }
-  20%, 40%, 60%, 80% { transform: translate(5px, -5px); }
+  10%, 30%, 50%, 70%, 90% { transform: translate(-3px, 3px); }
+  20%, 40%, 60%, 80% { transform: translate(3px, -3px); }
 }
 
-/* 紙吹雪アニメーション用のヘルパー */
 @keyframes confetti-fall {
   to {
     transform: translateY(100vh) rotate(360deg);
     opacity: 0;
   }
+}
+
+/* ==========================================
+   Utility Classes
+   ========================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

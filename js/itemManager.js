@@ -81,6 +81,13 @@ class ItemManager {
     return true;
   }
 
+  deleteAllItems() {
+    this.items = [];
+    this.persist();
+    this.emit('allItemsDeleted');
+    return true;
+  }
+
   generateRandomColor() {
     const usedColors = new Set(this.items.map(t => t.color));
     const availableColors = this.COLOR_PALETTE.filter(c => !usedColors.has(c));

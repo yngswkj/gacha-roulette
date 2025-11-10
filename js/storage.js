@@ -3,7 +3,7 @@
 class StorageService {
   constructor() {
     this.STORAGE_KEY = 'gacha_items_v1';
-    this.SCHEMA_VERSION = '1.0';
+    this.SCHEMA_VERSION = '2.0'; // 30個テンプレート対応
     this.MAX_ITEMS = 50;
 
     this.validateBrowserSupport();
@@ -84,48 +84,32 @@ class StorageService {
    */
   getDefaultItems() {
     const now = Date.now();
-    return [
-      {
-        id: this.generateId(),
-        name: '営業部',
-        isWinner: false,
-        color: '#FF6B6B',
-        createdAt: now,
-        updatedAt: now
-      },
-      {
-        id: this.generateId(),
-        name: '開発部',
-        isWinner: false,
-        color: '#4ECDC4',
-        createdAt: now,
-        updatedAt: now
-      },
-      {
-        id: this.generateId(),
-        name: '企画部',
-        isWinner: false,
-        color: '#95E1D3',
-        createdAt: now,
-        updatedAt: now
-      },
-      {
-        id: this.generateId(),
-        name: '人事部',
-        isWinner: false,
-        color: '#FFE66D',
-        createdAt: now,
-        updatedAt: now
-      },
-      {
-        id: this.generateId(),
-        name: '総務部',
-        isWinner: false,
-        color: '#C77DFF',
-        createdAt: now,
-        updatedAt: now
-      }
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#95E1D3', '#FFE66D', '#C77DFF',
+      '#FF8C94', '#A8E6CF', '#FFD3B6', '#FFAAA5', '#B4A7D6'
     ];
+
+    // 30個のランダムな項目名候補
+    const nameTemplates = [
+      '営業部', '開発部', '企画部', '人事部', '総務部',
+      'マーケティング部', '経理部', '法務部', '広報部', 'デザイン部',
+      'チームA', 'チームB', 'チームC', 'チームD', 'チームE',
+      'プロジェクトα', 'プロジェクトβ', 'プロジェクトγ', 'プロジェクトδ', 'プロジェクトε',
+      '選択肢1', '選択肢2', '選択肢3', '選択肢4', '選択肢5',
+      'オプションA', 'オプションB', 'オプションC', 'オプションD', 'オプションE'
+    ];
+
+    // 配列をシャッフルして30個取得
+    const shuffled = [...nameTemplates].sort(() => Math.random() - 0.5);
+
+    return shuffled.map((name, index) => ({
+      id: this.generateId(),
+      name: name,
+      isWinner: false,
+      color: colors[index % colors.length],
+      createdAt: now,
+      updatedAt: now
+    }));
   }
 
   /**

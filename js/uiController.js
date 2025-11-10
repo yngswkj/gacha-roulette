@@ -15,6 +15,7 @@ class UIController {
 
     // 管理タブ
     document.getElementById('add-item-btn').addEventListener('click', () => this.addItem());
+    document.getElementById('delete-all-btn').addEventListener('click', () => this.deleteAll());
     document.getElementById('reset-all-btn').addEventListener('click', () => this.resetAll());
     document.getElementById('items-grid').addEventListener('click', (e) => this.handleCardAction(e));
 
@@ -27,7 +28,7 @@ class UIController {
     document.getElementById('lottery-again-btn').addEventListener('click', () => this.lotteryAgain());
 
     // イベント
-    ['itemAdded', 'itemUpdated', 'itemDeleted', 'allItemsReset'].forEach(event => {
+    ['itemAdded', 'itemUpdated', 'itemDeleted', 'allItemsReset', 'allItemsDeleted'].forEach(event => {
       this.itemManager.on(event, () => this.renderItems());
     });
   }
@@ -118,6 +119,13 @@ class UIController {
     if (!name) return;
     try { this.itemManager.addItem(name); this.toast('追加しました', 'success'); }
     catch (e) { this.toast(e.message, 'error'); }
+  }
+
+  deleteAll() {
+    if (confirm('本当に全項目を削除しますか?\nこの操作は取り消せません。')) {
+      this.itemManager.deleteAllItems();
+      this.toast('全項目を削除しました', 'success');
+    }
   }
 
   resetAll() {

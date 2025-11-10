@@ -52,9 +52,6 @@ class AnimationManager {
       height: ${canvasHeight}px;
     `;
 
-    console.log('Canvas size calculated:', canvasWidth, 'x', canvasHeight);
-    console.log('Viewport size:', window.innerWidth, 'x', window.innerHeight);
-
     const message = document.createElement('div');
     message.id = 'physics-message';
     message.style.cssText = `
