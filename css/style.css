@@ -843,6 +843,48 @@ button:disabled {
 }
 
 /* ==========================================
+   WebGL Overlay
+   ========================================== */
+.webgl-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at top center, rgba(46, 61, 98, 0.85), rgba(6, 6, 19, 0.98));
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.webgl-overlay canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.webgl-status {
+  position: absolute;
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 24px rgba(255, 255, 255, 0.65),
+    0 10px 30px rgba(0, 0, 0, 0.85);
+}
+
+@media (max-width: 768px) {
+  .webgl-status {
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    bottom: 6vh;
+  }
+}
+
+/* ==========================================
    Physics Animation Helpers
    ========================================== */
 @keyframes capsule-shake {

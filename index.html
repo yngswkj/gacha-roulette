@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/gacha-machine-3d.css">
 </head>
 <body>
   <div class="app-container">
@@ -155,17 +154,20 @@
   <!-- トースト通知用コンテナ -->
   <div id="toast-container"></div>
 
-  <!-- Matter.js CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <!-- WebGL Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r165/three.min.js" integrity="sha512-x2ymlk/wEYBLETymFcpnSUsctNk6heAQ7Ez+KQEiC5EvhczHxVn9Yx8RJWb1x1oGf4bm/FYnGV8eK3opgDdG9A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js" integrity="sha512-WqYkKqeFTig84yYI6FqdtYYdlcYNSeNBY0d5hDOGOZa2m30IZHuZOKhHvJ3C0cI85FhF38sZ4N2VNivX8XQ0FQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <!-- JavaScriptファイル -->
+  <!-- JavaScript�t�@�C�� -->
   <script src="js/storage.js"></script>
   <script src="js/itemManager.js"></script>
   <script src="js/animationManager.js"></script>
-  <script src="js/gacha3DMachine.js"></script>
+  <script src="js/webglGachaScene.js"></script>
   <script src="js/gachaPhysics.js"></script>
   <script src="js/uiController.js"></script>
   <script src="js/lottery.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
+
+
