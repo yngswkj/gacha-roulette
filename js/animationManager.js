@@ -164,4 +164,90 @@ class AnimationManager {
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  // 3Dガチャマシンシーンを表示
+  show3DGachaScene() {
+    // シーン全体のコンテナ
+    const scene = document.createElement('div');
+    scene.className = 'gacha-3d-scene';
+    scene.id = 'gacha-3d-scene';
+
+    // 3Dコンテナ
+    const container = document.createElement('div');
+    container.className = 'gacha-3d-container';
+
+    // ガチャマシン
+    const machine = document.createElement('div');
+    machine.className = 'gacha-machine';
+
+    // ドーム（透明な球体）
+    const dome = document.createElement('div');
+    dome.className = 'gacha-dome';
+
+    // ドーム内のキャンバス（Matter.js描画用）
+    const domeCanvas = document.createElement('canvas');
+    domeCanvas.className = 'gacha-dome-canvas';
+    // ドームの90%サイズ
+    domeCanvas.width = 360;
+    domeCanvas.height = 360;
+    dome.appendChild(domeCanvas);
+
+    // ハンドル
+    const handle = document.createElement('div');
+    handle.className = 'gacha-handle';
+
+    // 排出口
+    const outlet = document.createElement('div');
+    outlet.className = 'gacha-outlet';
+
+    // 台座
+    const base = document.createElement('div');
+    base.className = 'gacha-base';
+
+    // メッセージ
+    const message = document.createElement('div');
+    message.className = 'gacha-3d-message';
+    message.id = 'gacha-3d-message';
+    message.textContent = 'ガチャマシンが起動しています...';
+
+    // 組み立て
+    machine.appendChild(dome);
+    machine.appendChild(handle);
+    machine.appendChild(outlet);
+    machine.appendChild(base);
+
+    container.appendChild(machine);
+    scene.appendChild(container);
+    scene.appendChild(message);
+
+    document.body.appendChild(scene);
+
+    return {
+      scene,
+      container,
+      machine,
+      dome,
+      domeCanvas,
+      handle,
+      outlet,
+      base,
+      message
+    };
+  }
+
+  // 3Dガチャマシンシーンを削除
+  hide3DGachaScene() {
+    const scene = document.getElementById('gacha-3d-scene');
+    if (scene) {
+      scene.remove();
+    }
+  }
+
+  // 3Dメッセージを更新
+  update3DMessage(text) {
+    const message = document.getElementById('gacha-3d-message');
+    if (message) {
+      message.textContent = text;
+    }
+  }
 }

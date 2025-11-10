@@ -3,6 +3,7 @@ class GachaPhysicsEngine {
   constructor(uiController) {
     this.ui = uiController;
     this.animationManager = new AnimationManager();
+    this.gacha3D = null; // 3Dガチャマシンインスタンス
     this.engine = null;
     this.world = null;
     this.render = null;
@@ -75,27 +76,16 @@ class GachaPhysicsEngine {
     this.isRunning = true;
 
     try {
-      // 物理演算オーバーレイを表示
-      const { overlay, canvas, message } = this.animationManager.showPhysicsOverlay();
+      // 3Dガチャマシンを使用
+      this.gacha3D = new Gacha3DMachine(this.animationManager, this);
+      const winner = await this.gacha3D.start(eligibleItems);
 
-      // DOMレンダリングを待つ（重要！）
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // 3Dシーンを削除
+      this.animationManager.hide3DGachaScene();
 
-      // 物理エンジン初期化
-      this.initEngine(canvas);
-
-      // 5フェーズの抽選演出
-      await this.runPhysicsAnimation(eligibleItems, canvas);
-
-      // ランダムに当選項目を選出
-      const winner = eligibleItems[Math.floor(Math.random() * eligibleItems.length)];
-
-      // 物理エンジンを停止
-      this.cleanup();
-
-      // オーバーレイを削除
-      this.animationManager.hidePhysicsOverlay();
+      // クリーンアップ
+      this.gacha3D.cleanup();
+      this.gacha3D = null;
 
       // 結果画面を表示
       this.ui.showResult(winner);
@@ -108,7 +98,11 @@ class GachaPhysicsEngine {
     } catch (error) {
       console.error('Physics lottery error:', error);
       this.cleanup();
-      this.animationManager.hidePhysicsOverlay();
+      this.animationManager.hide3DGachaScene();
+      if (this.gacha3D) {
+        this.gacha3D.cleanup();
+        this.gacha3D = null;
+      }
       this.ui.toast('抽選中にエラーが発生しました', 'error');
       this.ui.switchTab('manage');
       this.isRunning = false;
