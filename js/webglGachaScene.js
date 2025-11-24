@@ -1,4 +1,4 @@
-// webglGachaScene.js - Three.js + cannon-es based gacha animation
+// webglGachaScene.js - High-fidelity Three.js + cannon-es based gacha animation
 class WebGLGachaScene {
   constructor(animationManager) {
     this.animationManager = animationManager;
@@ -12,17 +12,65 @@ class WebGLGachaScene {
     this.resizeHandler = null;
     this.world = null;
     this.capsules = [];
-    this.handleMesh = null;
-    this.baseGroup = null;
+    this.drumBody = null;
+    this.drumMesh = null;
+    this.gateBody = null; // Physics gate
     this.winnerCapsule = null;
-    this.frontWall = null;
     this.running = false;
+    this.skipping = false;
+    this.particles = [];
+    this.drumAngle = 0;
+    this.targetSpeed = 0;
+    this.currentSpeed = 0;
+    this.isEjecting = false;
+    this.innerLight = null;
+    this.params = {
+      speed: 8.0,
+      friction: 0.1
+    };
+  }
+
+  setParameters(params) {
+    this.params = { ...this.params, ...params };
+    if (this.world) {
+      this.updatePhysicsMaterial();
+    }
+    // If currently rotating at high speed (not ejecting, not stopped), update target speed immediately
+    if (this.running && !this.isEjecting && this.targetSpeed > 2.0) {
+      this.targetSpeed = this.params.speed;
+    }
+  }
+
+  updatePhysicsMaterial() {
+    if (!this.world) return;
+
+    // Update contact material friction
+    // We need to find the contact material between wall and capsule
+    // In setupPhysics we added it. We can iterate or store a reference.
+    // For simplicity, let's just update all contact materials or rebuild if needed.
+    // Cannon.js allows updating material properties on the fly.
+
+    const contactMat = this.world.contactmaterials[0]; // We only have one
+    if (contactMat) {
+      contactMat.friction = this.params.friction;
+    }
+  }
+
+  skip() {
+    this.skipping = true;
   }
 
   async play(items) {
     if (typeof THREE === 'undefined' || typeof CANNON === 'undefined') {
       throw new Error('WebGL dependencies are not loaded');
     }
+    this.skipping = false;
+    this.winnerCapsule = null;
+    this.isEjecting = false;
+    this.drumAngle = 0;
+    this.currentSpeed = 0;
+    this.targetSpeed = 0;
+
     this.setupOverlay();
     this.setupScene();
     this.setupPhysics();
@@ -31,21 +79,46 @@ class WebGLGachaScene {
     this.running = true;
     this.startLoop();
 
-    this.setStatus('ハンドルを回しています...');
-    await this.animateHandlePull();
-    this.setStatus('カプセルをシャッフル中...');
-    await this.shuffleCapsules();
-    const winner = this.selectWinner();
-    this.setStatus(`抽選中...「${winner.itemData.name}」をチェック`);
-    await this.highlightWinner(winner);
-    this.setStatus('カプセルを排出しています...');
-    await this.launchWinner();
-    this.setStatus('結果を表示します');
-    await this.animationManager.sleep(800);
+    // Phase 1: Start Rotation
+    this.setStatus('抽選を開始します...');
+    await this.wait(500);
+
+    this.setStatus('回しています...');
+    this.targetSpeed = this.params.speed; // Use param
+
+    // Mix for a while
+    await this.wait(2500);
+
+    // Phase 2: Slow down and Open Gate
+    if (!this.skipping) {
+      this.setStatus('カプセルを選出中...');
+      this.targetSpeed = 2.0;
+      this.isEjecting = true;
+
+      // Open the gate to let one fall
+      this.openGate();
+
+      // Wait for a winner
+      const winner = await this.waitForWinner();
+      this.winnerCapsule = winner;
+    } else {
+      this.winnerCapsule = this.capsules[Math.floor(Math.random() * this.capsules.length)];
+    }
+
+    // Phase 3: Result
+    this.targetSpeed = 0;
+    this.setStatus(`当選: ${this.winnerCapsule.itemData.name}`);
+
+    if (!this.skipping) {
+      await this.highlightWinner(this.winnerCapsule);
+    }
+
+    this.spawnConfetti(this.winnerCapsule.mesh.position);
+    await this.wait(1000);
 
     this.running = false;
     this.teardown();
-    return winner.itemData;
+    return this.winnerCapsule.itemData;
   }
 
   setupOverlay() {
@@ -67,28 +140,42 @@ class WebGLGachaScene {
       powerPreference: 'high-performance'
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.2; // Brighter
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.overlay.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x060613);
-    this.camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-    this.camera.position.set(0, 5, 14);
-    this.camera.lookAt(0, 3, 0);
+    // Brighter, more vibrant background
+    this.scene.background = new THREE.Color(0x1a1a2e);
+    this.scene.fog = new THREE.FogExp2(0x1a1a2e, 0.015);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    this.camera.position.set(0, 5, 18);
+    this.camera.lookAt(0, 0, 0);
+
+    // --- Lighting Setup ---
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
     this.scene.add(ambient);
 
-    const keyLight = new THREE.SpotLight(0xfff0e0, 1.4, 0, Math.PI / 5, 0.3, 2);
-    keyLight.position.set(6, 10, 6);
-    keyLight.target.position.set(0, 2, 0);
-    this.scene.add(keyLight);
-    this.scene.add(keyLight.target);
+    const spotLight = new THREE.SpotLight(0xfff0dd, 1.5);
+    spotLight.position.set(10, 15, 10);
+    spotLight.angle = Math.PI / 4;
+    spotLight.penumbra = 0.5;
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
+    this.scene.add(spotLight);
 
-    const rimLight = new THREE.SpotLight(0x80d9ff, 0.8, 0, Math.PI / 4, 0.4, 2);
-    rimLight.position.set(-6, 9, -4);
-    rimLight.target.position.set(0, 2, 0);
-    this.scene.add(rimLight);
-    this.scene.add(rimLight.target);
+    const fillLight = new THREE.PointLight(0x88ccff, 0.8);
+    fillLight.position.set(-10, 5, 5);
+    this.scene.add(fillLight);
+
+    // Inner Light (Inside the drum to illuminate capsules)
+    this.innerLight = new THREE.PointLight(0xffaa00, 5.0, 20);
+    this.innerLight.position.set(0, 0, 0);
+    this.scene.add(this.innerLight);
 
     this.clock = new THREE.Clock();
     this.handleResize();
@@ -98,233 +185,407 @@ class WebGLGachaScene {
 
   setupPhysics() {
     this.world = new CANNON.World();
-    this.world.gravity.set(0, -9.82, 0);
+    this.world.gravity.set(0, -15, 0); // Stronger gravity for snappier movement
     this.world.broadphase = new CANNON.NaiveBroadphase();
-    this.world.solver.iterations = 10;
-    this.world.allowSleep = true;
+    this.world.solver.iterations = 20; // More iterations for stability
+    this.world.defaultContactMaterial.friction = 0.1; // Low friction for rolling
+    this.world.defaultContactMaterial.restitution = 0.3; // Less bouncy
 
-    const groundShape = new CANNON.Box(new CANNON.Vec3(5, 0.5, 5));
-    const ground = new CANNON.Body({ mass: 0, shape: groundShape });
-    ground.position.set(0, -0.5, 0);
+    // Materials
+    const wallMat = new CANNON.Material('wall');
+    const capsuleMat = new CANNON.Material('capsule');
+
+    const wallCapsuleContact = new CANNON.ContactMaterial(wallMat, capsuleMat, {
+      friction: this.params.friction,
+      restitution: 0.2
+    });
+    this.world.addContactMaterial(wallCapsuleContact);
+
+    // Ground (Catch tray area)
+    const groundShape = new CANNON.Box(new CANNON.Vec3(10, 0.5, 10));
+    const ground = new CANNON.Body({ mass: 0, material: wallMat });
+    ground.position.set(0, -4.5, 0);
     this.world.addBody(ground);
-
-    const wallHeight = 5;
-    const backWall = new CANNON.Body({
-      mass: 0,
-      shape: new CANNON.Box(new CANNON.Vec3(5, wallHeight / 2, 0.3))
-    });
-    backWall.position.set(0, wallHeight / 2, -5);
-    this.world.addBody(backWall);
-
-    this.frontWall = new CANNON.Body({
-      mass: 0,
-      shape: new CANNON.Box(new CANNON.Vec3(5, wallHeight / 2, 0.3))
-    });
-    this.frontWall.position.set(0, wallHeight / 2, 5);
-    this.world.addBody(this.frontWall);
-
-    const leftWall = new CANNON.Body({
-      mass: 0,
-      shape: new CANNON.Box(new CANNON.Vec3(0.3, wallHeight / 2, 5))
-    });
-    leftWall.position.set(-5, wallHeight / 2, 0);
-    this.world.addBody(leftWall);
-
-    const rightWall = new CANNON.Body({
-      mass: 0,
-      shape: new CANNON.Box(new CANNON.Vec3(0.3, wallHeight / 2, 5))
-    });
-    rightWall.position.set(5, wallHeight / 2, 0);
-    this.world.addBody(rightWall);
   }
 
   buildMachine() {
-    this.baseGroup = new THREE.Group();
-    const platformGeometry = new THREE.CylinderGeometry(6, 6, 1, 48);
-    const platformMaterial = new THREE.MeshStandardMaterial({
-      color: 0x242446,
-      metalness: 0.4,
-      roughness: 0.3
-    });
-    const base = new THREE.Mesh(platformGeometry, platformMaterial);
-    base.position.y = -0.5;
-    this.baseGroup.add(base);
+    // --- Visuals ---
+    const drumGroup = new THREE.Group();
 
-    const glassGeometry = new THREE.SphereGeometry(5.2, 64, 64, 0, Math.PI * 2, 0, Math.PI / 1.2);
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x88f0ff,
-      emissive: 0x0,
-      metalness: 0,
-      roughness: 0,
-      transmission: 0.9,
-      thickness: 0.4,
-      opacity: 0.35,
-      transparent: true
+    // Materials
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0xFFD700, // Gold
+      roughness: 0.2,
+      metalness: 0.9,
+      envMapIntensity: 1.5
     });
-    const dome = new THREE.Mesh(glassGeometry, glassMaterial);
-    dome.position.y = 2.5;
-    this.baseGroup.add(dome);
 
-    const outletGeometry = new THREE.BoxGeometry(2.5, 1, 1.5);
-    const outletMaterial = new THREE.MeshStandardMaterial({
-      color: 0xff6b6b,
-      emissive: 0x120000,
-      metalness: 0.5,
-      roughness: 0.2
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0xaaccff,
+      roughness: 0.0,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.DoubleSide,
+      depthWrite: false
     });
-    const outlet = new THREE.Mesh(outletGeometry, outletMaterial);
-    outlet.position.set(0, 0.5, 5.5);
-    this.baseGroup.add(outlet);
 
-    const handleGeometry = new THREE.CylinderGeometry(0.15, 0.15, 3.5, 32);
-    const handleMaterial = new THREE.MeshStandardMaterial({
-      color: 0xfcd144,
-      metalness: 0.8,
-      roughness: 0.2
+    // Drum Dimensions
+    const radius = 4.0;
+    const width = 3.0;
+    const sides = 8;
+    const jointRadius = 0.15;
+    const barRadius = 0.08;
+
+    // Helper to create a bar between two points
+    const createBar = (p1, p2) => {
+      const vec = new THREE.Vector3().subVectors(p2, p1);
+      const len = vec.length();
+      const geo = new THREE.CylinderGeometry(barRadius, barRadius, len, 16);
+      geo.translate(0, len / 2, 0);
+      geo.rotateX(Math.PI / 2);
+      const mesh = new THREE.Mesh(geo, frameMat);
+      mesh.position.copy(p1);
+      mesh.lookAt(p2);
+      return mesh;
+    };
+
+    // Calculate Vertices
+    const frontVertices = [];
+    const backVertices = [];
+
+    for (let i = 0; i < sides; i++) {
+      const angle = (i / sides) * Math.PI * 2 + Math.PI / 8; // Offset to have flat bottom
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+
+      frontVertices.push(new THREE.Vector3(x, y, width / 2));
+      backVertices.push(new THREE.Vector3(x, y, -width / 2));
+    }
+
+    // Build Frame Structure
+    for (let i = 0; i < sides; i++) {
+      const p1 = frontVertices[i];
+      const p2 = frontVertices[(i + 1) % sides];
+      const p3 = backVertices[i];
+      const p4 = backVertices[(i + 1) % sides];
+
+      // 1. Joints (Spheres)
+      const jointGeo = new THREE.SphereGeometry(jointRadius, 16, 16);
+      const j1 = new THREE.Mesh(jointGeo, frameMat); j1.position.copy(p1); drumGroup.add(j1);
+      const j3 = new THREE.Mesh(jointGeo, frameMat); j3.position.copy(p3); drumGroup.add(j3);
+
+      // 2. Edges (Bars)
+      // Front Rim
+      drumGroup.add(createBar(p1, p2));
+      // Back Rim
+      drumGroup.add(createBar(p3, p4));
+      // Cross Bar (Front to Back)
+      drumGroup.add(createBar(p1, p3));
+
+      // 3. Glass Panels
+      // Skip panel for the hole (let's say index 0 is the hole)
+      if (i !== 0) {
+        // Center of the panel
+        const center = new THREE.Vector3().addVectors(p1, p2).add(p3).add(p4).multiplyScalar(0.25);
+        const panelWidth = p1.distanceTo(p2);
+        const panelGeo = new THREE.BoxGeometry(panelWidth, width, 0.05);
+        const panel = new THREE.Mesh(panelGeo, glassMat);
+
+        panel.position.copy(center);
+        // Rotate to face outward
+        const normal = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5).normalize();
+        panel.lookAt(center.clone().add(normal));
+        // Adjust orientation because BoxGeometry is axis-aligned
+        // We want width along the rim, height along Z? No, Box is X,Y,Z
+        // Our panel is positioned. lookAt makes Z axis point to target.
+        // We want the flat face (Z) to point outward.
+
+        drumGroup.add(panel);
+      }
+    }
+
+    this.drumMesh = drumGroup;
+    this.scene.add(this.drumMesh);
+
+    // Base Stand
+    const standGeo = new THREE.BoxGeometry(8, 1, 5);
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 });
+    const stand = new THREE.Mesh(standGeo, standMat);
+    stand.position.y = -4.5; // Lowered slightly
+    stand.receiveShadow = true;
+    this.scene.add(stand);
+
+    // Catch Tray
+    const trayGeo = new THREE.BoxGeometry(4, 0.5, 4);
+    const trayMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.5 });
+    const tray = new THREE.Mesh(trayGeo, trayMat);
+    tray.position.set(0, -4.2, 0);
+    this.scene.add(tray);
+
+    // --- Physics ---
+    this.drumBody = new CANNON.Body({
+      mass: 0,
+      type: CANNON.Body.KINEMATIC,
+      position: new CANNON.Vec3(0, 0, 0)
     });
-    this.handleMesh = new THREE.Mesh(handleGeometry, handleMaterial);
-    this.handleMesh.rotation.z = Math.PI / 2;
-    this.handleMesh.position.set(5, 3.5, 0);
-    this.baseGroup.add(this.handleMesh);
 
-    const knobGeometry = new THREE.SphereGeometry(0.8, 32, 32);
-    const knobMaterial = new THREE.MeshStandardMaterial({
-      color: 0xff4e8b,
-      metalness: 0.6,
-      roughness: 0.3
+    // Re-calculate side length for physics
+    const sideLen = frontVertices[0].distanceTo(frontVertices[1]);
+    const physicsThickness = 1.0;
+    const plateShape = new CANNON.Box(new CANNON.Vec3(sideLen / 2, physicsThickness / 2, width / 2));
+
+    for (let i = 0; i < sides; i++) {
+      if (i === 0) continue; // Hole
+
+      const angle = (i / sides) * Math.PI * 2 + Math.PI / 8;
+      const dist = radius;
+
+      const q = new CANNON.Quaternion();
+      q.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), angle + Math.PI / 2); // Normal points out
+
+      // Position is midpoint of the face
+      const x = Math.cos(angle) * dist;
+      const y = Math.sin(angle) * dist;
+
+      this.drumBody.addShape(plateShape, new CANNON.Vec3(x, y, 0), q);
+    }
+
+    // Side walls
+    const sideWallShape = new CANNON.Box(new CANNON.Vec3(radius, radius, 0.5));
+    this.drumBody.addShape(sideWallShape, new CANNON.Vec3(0, 0, width / 2 + 0.5));
+    this.drumBody.addShape(sideWallShape, new CANNON.Vec3(0, 0, -width / 2 - 0.5));
+
+    // Internal Baffles
+    const baffleShape = new CANNON.Box(new CANNON.Vec3(1.2, 0.1, width / 2));
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2 + Math.PI / 8 + 0.5; // Offset
+      const dist = radius * 0.7;
+      const q = new CANNON.Quaternion();
+      q.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), angle + Math.PI / 2 + 0.5);
+      this.drumBody.addShape(baffleShape, new CANNON.Vec3(Math.cos(angle) * dist, Math.sin(angle) * dist, 0), q);
+    }
+
+    this.world.addBody(this.drumBody);
+
+    // --- Gate Mechanism ---
+    this.gateBody = new CANNON.Body({
+      mass: 0,
+      type: CANNON.Body.KINEMATIC,
+      position: new CANNON.Vec3(0, 0, 0)
     });
-    const knob = new THREE.Mesh(knobGeometry, knobMaterial);
-    knob.position.set(6.5, 3.5, 0);
-    this.baseGroup.add(knob);
 
-    this.scene.add(this.baseGroup);
+    // Gate covers the hole (index 0)
+    // Angle for index 0 is Math.PI/8
+    const gateAngle = Math.PI / 8;
+    const gateDist = radius;
+    const gateShape = new CANNON.Box(new CANNON.Vec3(sideLen / 2, 0.2, width / 2));
+
+    const gateQ = new CANNON.Quaternion();
+    gateQ.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), gateAngle + Math.PI / 2);
+
+    // Add shape with offset relative to body center (0,0,0)
+    this.gateBody.addShape(gateShape, new CANNON.Vec3(Math.cos(gateAngle) * gateDist, Math.sin(gateAngle) * gateDist, 0), gateQ);
+
+    this.world.addBody(this.gateBody);
+  }
+
+  openGate() {
+    if (this.gateBody) {
+      this.world.removeBody(this.gateBody);
+      this.gateBody = null;
+    }
   }
 
   spawnCapsules(items) {
     const radius = 0.45;
-    const geometry = new THREE.SphereGeometry(radius, 32, 32);
+
     items.forEach((item, index) => {
+      const group = new THREE.Group();
+
+      const topGeo = new THREE.SphereGeometry(radius, 24, 24, 0, Math.PI * 2, 0, Math.PI / 2);
+      const bottomGeo = new THREE.SphereGeometry(radius, 24, 24, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+
       const color = item.color || '#4ECDC4';
-      const material = new THREE.MeshStandardMaterial({
-        color,
-        emissive: 0x111111,
+      const topMat = new THREE.MeshPhysicalMaterial({
+        color: color,
         metalness: 0.3,
-        roughness: 0.35
+        roughness: 0.2,
+        clearcoat: 0.8
       });
-      const mesh = new THREE.Mesh(geometry, material);
-      this.scene.add(mesh);
+      const bottomMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        metalness: 0.1,
+        roughness: 0.2
+      });
+
+      const topMesh = new THREE.Mesh(topGeo, topMat);
+      const bottomMesh = new THREE.Mesh(bottomGeo, bottomMat);
+
+      group.add(topMesh);
+      group.add(bottomMesh);
+      this.scene.add(group);
 
       const body = new CANNON.Body({
-        mass: 0.35,
+        mass: 1,
         shape: new CANNON.Sphere(radius),
         material: new CANNON.Material('capsule')
       });
-      const angle = (index / items.length) * Math.PI * 2;
-      body.position.set(Math.cos(angle) * 2, 3 + Math.random(), Math.sin(angle) * 2);
-      body.linearDamping = 0.31;
-      body.angularDamping = 0.3;
+
+      body.position.set(
+        (Math.random() - 0.5) * 3,
+        (Math.random() - 0.5) * 3,
+        (Math.random() - 0.5) * 1
+      );
+
+      body.linearDamping = 0.1;
+      body.angularDamping = 0.1;
       body.itemData = item;
       this.world.addBody(body);
 
-      this.capsules.push({ mesh, body, itemData: item });
+      this.capsules.push({ mesh: group, body, itemData: item });
     });
   }
 
   startLoop() {
     const step = () => {
       if (!this.running) return;
-      const delta = Math.min(this.clock.getDelta(), 0.033);
-      this.world.step(1 / 60, delta, 5);
+      const delta = Math.min(this.clock.getDelta(), 0.05);
+
+      // Update Drum Rotation
+      if (this.currentSpeed !== this.targetSpeed) {
+        this.currentSpeed += (this.targetSpeed - this.currentSpeed) * 3.0 * delta;
+      }
+
+      this.drumAngle += this.currentSpeed * delta;
+
+      // Sync Drum Physics
+      const q = new CANNON.Quaternion();
+      q.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), this.drumAngle);
+      this.drumBody.quaternion.copy(q);
+
+      // Sync Gate Physics (if exists)
+      if (this.gateBody) {
+        this.gateBody.quaternion.copy(q);
+        // Need to rotate position offset? No, body is at 0,0,0, shape is offset.
+        // Just rotation is enough if pivot is 0,0,0
+      }
+
+      // Sync Visuals
+      this.drumMesh.rotation.z = this.drumAngle;
+
+      // Camera Effect: Slight zoom/sway
+      if (this.camera) {
+        const time = Date.now() * 0.001;
+        this.camera.position.y = 5 + Math.sin(time * 0.5) * 0.2;
+        this.camera.lookAt(0, 0, 0);
+      }
+
+      // Physics Step (Sub-stepping for stability)
+      this.world.step(1 / 60, delta, 10);
+
       this.capsules.forEach(capsule => {
         const { mesh, body } = capsule;
         mesh.position.copy(body.position);
         mesh.quaternion.copy(body.quaternion);
+
+        // Z-constraint
+        if (body.position.z > 2.2) { body.position.z = 2.2; body.velocity.z *= -0.5; }
+        if (body.position.z < -2.2) { body.position.z = -2.2; body.velocity.z *= -0.5; }
       });
+
+      this.updateParticles(delta);
+
       this.renderer.render(this.scene, this.camera);
       this.animationId = requestAnimationFrame(step);
     };
     this.animationId = requestAnimationFrame(step);
   }
 
-  async animateHandlePull() {
-    await this.animateValue(0, Math.PI, 1100, value => {
-      if (this.handleMesh) {
-        this.handleMesh.rotation.y = value;
-      }
+  async waitForWinner() {
+    return new Promise(resolve => {
+      const checkInterval = setInterval(() => {
+        if (!this.running || this.skipping) {
+          clearInterval(checkInterval);
+          resolve(null);
+          return;
+        }
+
+        const winner = this.capsules.find(c => c.body.position.y < -3.0);
+        if (winner) {
+          clearInterval(checkInterval);
+          resolve(winner);
+        }
+      }, 50);
     });
-  }
-
-  async shuffleCapsules() {
-    for (let i = 0; i < 6; i++) {
-      this.capsules.forEach(({ body }) => {
-        const force = new CANNON.Vec3(
-          (Math.random() - 0.5) * 6,
-          Math.random() * 8,
-          (Math.random() - 0.5) * 6
-        );
-        body.applyImpulse(force, body.position);
-      });
-      await this.animationManager.sleep(280);
-    }
-  }
-
-  selectWinner() {
-    const index = Math.floor(Math.random() * this.capsules.length);
-    this.winnerCapsule = this.capsules[index];
-    return this.winnerCapsule;
   }
 
   async highlightWinner(capsule) {
-    capsule.mesh.material.emissive = new THREE.Color(0xffd700);
-    capsule.mesh.material.color = new THREE.Color(0xfff3a0);
-    await this.animationManager.sleep(1200);
-  }
+    // Zoom in on winner
+    const startPos = this.camera.position.clone();
+    const targetPos = new THREE.Vector3(0, -2, 8);
 
-  async launchWinner() {
-    if (!this.winnerCapsule) return;
-    if (this.frontWall) {
-      this.world.removeBody(this.frontWall);
-      this.frontWall = null;
-    }
-    const { body } = this.winnerCapsule;
-    body.mass = 1;
-    body.updateMassProperties();
-    body.applyImpulse(new CANNON.Vec3(0, 6, 18), body.position);
-
-    await this.waitForCondition(() => body.position.z > 6.5 || body.position.y < -1, 5000);
-  }
-
-  async animateValue(from, to, duration, onUpdate) {
-    const start = performance.now();
-    return new Promise(resolve => {
-      const tick = now => {
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = progress < 0.5
-          ? 2 * progress * progress
-          : -1 + (4 - 2 * progress) * progress;
-        onUpdate(from + (to - from) * eased);
-        if (progress < 1) {
-          requestAnimationFrame(tick);
-        } else {
-          resolve();
-        }
-      };
-      requestAnimationFrame(tick);
+    await this.animateValue(0, 1, 800, t => {
+      this.camera.position.lerpVectors(startPos, targetPos, t);
+      this.camera.lookAt(0, -3, 0);
     });
   }
 
-  waitForCondition(predicate, timeout = 4000) {
-    const start = performance.now();
-    return new Promise((resolve, reject) => {
+  // ... (rest of methods: spawnConfetti, updateParticles, wait, animateValue, setStatus, handleResize, teardown)
+  // Re-implementing helpers to ensure they are present
+
+  spawnConfetti(position) {
+    const particleCount = 150;
+    const geometry = new THREE.BufferGeometry();
+    const positions = [];
+    const velocities = [];
+    const colors = [];
+    const colorPalette = [new THREE.Color(0xffd700), new THREE.Color(0xff0000), new THREE.Color(0xffffff)];
+
+    for (let i = 0; i < particleCount; i++) {
+      positions.push(position.x, position.y, position.z);
+      const theta = Math.random() * Math.PI * 2;
+      const speed = 3 + Math.random() * 5;
+      velocities.push(speed * Math.cos(theta), speed * Math.sin(theta) + 5, (Math.random() - 0.5) * 4);
+      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      colors.push(color.r, color.g, color.b);
+    }
+
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    const material = new THREE.PointsMaterial({ size: 0.1, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending });
+    const particles = new THREE.Points(geometry, material);
+    this.scene.add(particles);
+    this.particles.push({ mesh: particles, velocities: velocities, age: 0 });
+  }
+
+  updateParticles(delta) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.age += delta;
+      if (p.age > 2.0) {
+        this.scene.remove(p.mesh);
+        this.particles.splice(i, 1);
+        continue;
+      }
+      const positions = p.mesh.geometry.attributes.position.array;
+      for (let j = 0; j < p.velocities.length / 3; j++) {
+        p.velocities[j * 3 + 1] -= 9.8 * delta;
+        positions[j * 3] += p.velocities[j * 3] * delta;
+        positions[j * 3 + 1] += p.velocities[j * 3 + 1] * delta;
+        positions[j * 3 + 2] += p.velocities[j * 3 + 2] * delta;
+      }
+      p.mesh.geometry.attributes.position.needsUpdate = true;
+    }
+  }
+
+  async wait(ms) {
+    if (this.skipping) return;
+    return new Promise(resolve => {
+      const start = performance.now();
       const check = () => {
-        if (predicate()) {
-          resolve();
-          return;
-        }
-        if (performance.now() - start > timeout) {
-          resolve();
-          return;
+        if (this.skipping || performance.now() - start >= ms) {
+          resolve(); return;
         }
         requestAnimationFrame(check);
       };
@@ -332,9 +593,30 @@ class WebGLGachaScene {
     });
   }
 
+  async animateValue(from, to, duration, onUpdate) {
+    if (this.skipping) { onUpdate(to); return; }
+    const start = performance.now();
+    return new Promise(resolve => {
+      const tick = now => {
+        if (!this.running) { resolve(); return; }
+        if (this.skipping) { onUpdate(to); resolve(); return; }
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+        onUpdate(from + (to - from) * eased);
+        if (progress < 1) requestAnimationFrame(tick);
+        else resolve();
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
   setStatus(message) {
     if (this.statusEl) {
       this.statusEl.textContent = message;
+      this.statusEl.classList.remove('pop');
+      void this.statusEl.offsetWidth;
+      this.statusEl.classList.add('pop');
     }
   }
 
@@ -353,28 +635,12 @@ class WebGLGachaScene {
       this.animationId = null;
     }
     this.running = false;
-    if (this.resizeHandler) {
-      window.removeEventListener('resize', this.resizeHandler);
-      this.resizeHandler = null;
-    }
-    if (this.renderer) {
-      this.renderer.dispose();
-    }
-    this.capsules.forEach(({ mesh }) => {
-      if (mesh.parent) {
-        mesh.parent.remove(mesh);
-      }
-      if (mesh.geometry) mesh.geometry.dispose();
-      if (mesh.material) mesh.material.dispose();
-    });
+    if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
+    if (this.renderer) this.renderer.dispose();
+    this.capsules.forEach(({ mesh }) => this.scene.remove(mesh));
     this.capsules = [];
-    if (this.baseGroup) {
-      this.scene.remove(this.baseGroup);
-    }
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
+    if (this.drumMesh) this.scene.remove(this.drumMesh);
+    if (this.overlay) this.overlay.remove();
   }
 }
 

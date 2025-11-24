@@ -39,4 +39,10 @@ class GachaPhysicsEngine {
       this.isRunning = false;
     }
   }
+
+  skip() {
+    if (this.scene) {
+      this.scene.skip();
+    }
+  }
 }

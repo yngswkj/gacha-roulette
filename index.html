@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +11,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
   <div class="app-container">
     <!-- ヘッダー -->
     <header class="app-header">
       <h1 class="app-title">ガチャルーレット</h1>
+      <div class="header-actions">
+        <button id="show-history-btn" class="icon-btn" aria-label="履歴">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" aria-label="設定">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0-.33-1.82V9a1.65 1.65 0 0 0-1.51 1H3a2 2 0 0 1-2 2 2 2 0 0 1-2 2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="stats-bar">
       <div class="stats">
         <span class="stat-item">
           <span class="stat-label">未抽選:</span>
@@ -25,7 +44,7 @@
           <span class="stat-value" id="total-count">0</span>
         </span>
       </div>
-    </header>
+    </div>
 
     <!-- タブナビゲーション -->
     <nav class="tab-navigation">
@@ -40,22 +59,13 @@
       </button>
     </nav>
 
-    <!-- タブコンテンツ -->
-    <main class="tab-content-container">
-      <!-- 管理タブ -->
-      <div id="manage-tab" class="tab-content active">
-        <div class="tab-header">
-          <h2>項目管理</h2>
-          <button id="add-item-btn" class="btn-secondary">
-            項目を追加
-          </button>
-        </div>
-
-        <div id="items-grid" class="items-grid">
-          <!-- 項目カードが動的生成される -->
-        </div>
-
-        <div class="tab-footer">
+    <!-- 管理タブ -->
+    <div id="manage-tab" class="tab-content active">
+      <div class="manage-actions">
+        <button id="add-item-btn" class="btn-primary">
+          項目を追加
+        </button>
+        <div class="danger-actions">
           <button id="delete-all-btn" class="btn-danger btn-small">
             全項目を削除
           </button>
@@ -64,91 +74,131 @@
           </button>
         </div>
       </div>
+      <div id="items-grid" class="items-grid">
+        <!-- 項目リスト -->
+      </div>
+    </div>
 
-      <!-- 確認タブ -->
-      <div id="confirm-tab" class="tab-content">
+    <!-- 確認タブ -->
+    <div id="confirm-tab" class="tab-content">
+      <div class="tab-header">
+        <h2>抽選対象の確認</h2>
+      </div>
+
+      <div class="confirm-info">
+        <div class="info-box">
+          <h3>抽選対象項目数</h3>
+          <p class="big-number" id="confirm-eligible-count">0</p>
+        </div>
+      </div>
+
+      <div id="eligible-items-list" class="eligible-items-list">
+        <!-- 未抽選項目のリストが表示される -->
+      </div>
+
+      <div class="tab-footer">
+        <button id="goto-lottery-btn" class="btn-primary btn-large">
+          抽選を開始
+        </button>
+      </div>
+    </div>
+
+    <!-- 抽選タブ -->
+    <div id="lottery-tab" class="tab-content">
+      <!-- 抽選前の状態 -->
+      <div id="lottery-ready" class="lottery-state active">
         <div class="tab-header">
-          <h2>抽選対象の確認</h2>
+          <h2>抽選実行</h2>
         </div>
 
-        <div class="confirm-info">
-          <div class="info-box">
-            <h3>抽選対象項目数</h3>
-            <p class="big-number" id="confirm-eligible-count">0</p>
-          </div>
+        <div class="lottery-info">
+          <p class="lottery-message">
+            準備完了！抽選ボタンを押してください
+          </p>
+          <p class="lottery-detail">
+            抽選対象: <span id="lottery-eligible-count">0</span> 項目
+          </p>
         </div>
 
-        <div id="eligible-items-list" class="eligible-items-list">
-          <!-- 未抽選項目のリストが表示される -->
-        </div>
-
-        <div class="tab-footer">
-          <button id="goto-lottery-btn" class="btn-primary btn-large">
-            抽選を開始
+        <div class="action-area">
+          <button id="start-lottery-btn" class="btn-primary btn-large">
+            抽選開始
           </button>
         </div>
       </div>
 
-      <!-- 抽選タブ -->
-      <div id="lottery-tab" class="tab-content">
-        <!-- 抽選前の状態 -->
-        <div id="lottery-ready" class="lottery-state active">
-          <div class="tab-header">
-            <h2>抽選実行</h2>
-          </div>
+      <!-- 抽選中の状態 -->
+      <div id="lottery-running" class="lottery-state">
+        <div class="lottery-animation">
+          <div class="spinner"></div>
+          <p id="lottery-message" class="lottery-message">抽選中...</p>
+        </div>
+        <button id="skip-animation-btn" class="btn-ghost btn-small skip-btn">
+          スキップ
+        </button>
+      </div>
 
-          <div class="lottery-info">
-            <p class="lottery-message">
-              準備完了！抽選ボタンを押してください
-            </p>
-            <p class="lottery-detail">
-              抽選対象: <span id="lottery-eligible-count">0</span> 項目
-            </p>
-          </div>
-
-          <div class="action-area">
-            <button id="start-lottery-btn" class="btn-primary btn-large">
-              抽選開始
-            </button>
-          </div>
+      <!-- 結果表示の状態 -->
+      <div id="lottery-result" class="lottery-state">
+        <div class="result-header">
+          <h2 class="result-title">当選</h2>
         </div>
 
-        <!-- 抽選中の状態 -->
-        <div id="lottery-running" class="lottery-state">
-          <div class="lottery-animation">
-            <div class="spinner"></div>
-            <p id="lottery-message" class="lottery-message">抽選中...</p>
-          </div>
-        </div>
-
-        <!-- 結果表示の状態 -->
-        <div id="lottery-result" class="lottery-state">
-          <div class="result-header">
-            <h2 class="result-title">当選</h2>
-          </div>
-
-          <div class="result-container">
-            <div class="winner-display">
-              <div class="capsule-container">
-                <div class="capsule" id="result-capsule"></div>
-              </div>
-              <div class="winner-name" id="winner-name">
-                <!-- 項目名が表示される -->
-              </div>
+        <div class="result-container">
+          <div class="winner-display">
+            <div class="capsule-container">
+              <div class="capsule" id="result-capsule"></div>
+            </div>
+            <div class="winner-name" id="winner-name">
+              <!-- 項目名が表示される -->
             </div>
           </div>
+        </div>
 
-          <div class="tab-footer">
-            <button id="back-to-manage-btn" class="btn-secondary btn-large">
-              管理に戻る
-            </button>
-            <button id="lottery-again-btn" class="btn-primary btn-large">
-              もう一度抽選
-            </button>
-          </div>
+        <div class="tab-footer">
+          <button id="back-to-manage-btn" class="btn-secondary btn-large">
+            管理に戻る
+          </button>
+          <button id="lottery-again-btn" class="btn-primary btn-large">
+            もう一度抽選
+          </button>
         </div>
       </div>
-    </main>
+    </div>
+  </div>
+
+  <!-- 履歴モーダル -->
+  <div id="history-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>抽選履歴</h2>
+        <button id="close-history-btn" class="close-btn">&times;</button>
+      </div>
+      <div id="history-list" class="history-list">
+        <!-- 履歴リスト -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>設定</h2>
+        <button id="close-settings-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <label for="speed-slider">回転速度 <span id="speed-value">8.0</span></label>
+          <input type="range" id="speed-slider" min="1" max="20" step="0.5" value="8.0">
+        </div>
+        <div class="setting-item">
+          <label for="friction-slider">カプセル摩擦 <span id="friction-value">0.1</span></label>
+          <input type="range" id="friction-slider" min="0" max="1" step="0.05" value="0.1">
+          <p class="setting-desc">値が大きいほどカプセルがドラムに追従します。</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- トースト通知用コンテナ -->
@@ -162,7 +212,7 @@
     window.CANNON = CANNON;
   </script>
 
-  <!-- JavaScript�t�@�C�� -->
+  <!-- JavaScriptファイル -->
   <script src="js/storage.js"></script>
   <script src="js/itemManager.js"></script>
   <script src="js/animationManager.js"></script>
@@ -172,6 +222,5 @@
   <script src="js/lottery.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
-
-
